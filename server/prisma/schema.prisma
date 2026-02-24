@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,94 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AuctionStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum AuditAction {
+  BID_PLACED
+  AUCTION_CREATED
+  AUCTION_UPDATED
+  AUCTION_DELETED
+  USER_REGISTERED
+}
+
+model User {
+  id        String      @id @default(uuid())
+  name      String
+  email     String      @unique
+  password  String
+  role      UserRole    @default(USER)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  bids      Bid[]
+  auctions  Auction[]   @relation("UserAuctions")
+  auditLogs AuditLog[]
+}
+
+model Auction {
+  id                String        @id @default(uuid())
+  title             String
+  description       String
+  imageUrl          String
+  startingPrice     Float
+  currentHighestBid Float         @default(0)
+  startTime         DateTime
+  endTime           DateTime
+  status            AuctionStatus @default(UPCOMING)
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  createdById       String
+  createdBy         User          @relation("UserAuctions", fields: [createdById], references: [id])
+
+  bids              Bid[]
+  auditLogs         AuditLog[]
+
+  @@index([status])
+  @@index([endTime])
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  amount    Float
+  createdAt DateTime @default(now())
+
+  userId    String
+  auctionId String
+
+  user      User     @relation(fields: [userId], references: [id])
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+
+  @@index([auctionId])
+  @@index([userId])
+  @@index([auctionId, amount])
+}
+
+model AuditLog {
+  id        String      @id @default(uuid())
+  action    AuditAction
+  message   String
+  createdAt DateTime    @default(now())
+
+  userId    String?
+  auctionId String?
+
+  user      User?       @relation(fields: [userId], references: [id])
+  auction   Auction?    @relation(fields: [auctionId], references: [id])
+
+  @@index([auctionId])
+  @@index([userId])
 }
