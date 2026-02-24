@@ -5,6 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import authRoutes from "./routes/auth.routes";
 import { authenticate } from "./middlewares/auth.middleware";
+import auctionRoutes from "./routes/auction.routes";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/auctions", auctionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Auction API Running");
