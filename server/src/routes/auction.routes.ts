@@ -4,6 +4,7 @@ import {
   getOngoingAuctions,
   getUpcomingAuctions,
   getCompletedAuctions,
+  getAuctionById,
 } from "../controllers/auction.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 
@@ -16,5 +17,8 @@ router.post("/", authenticate, createAuction);
 router.get("/ongoing", getOngoingAuctions);
 router.get("/upcoming", getUpcomingAuctions);
 router.get("/completed", getCompletedAuctions);
+
+// Fetch single auction by id
+router.get("/:id", getAuctionById);
 
 export default router;

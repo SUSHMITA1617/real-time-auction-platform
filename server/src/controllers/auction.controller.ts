@@ -89,3 +89,24 @@ export const getCompletedAuctions = async (req: Request, res: Response) => {
 
   res.json(auctions);
 };
+
+
+  // Fetch single auction by id
+  export const getAuctionById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+      const auction = await prisma.auction.findUnique({
+        where: { id: Number(id) },
+        include: {
+          highestBidder: true,
+          bids: true,
+        },
+      });
+      if (!auction) {
+        return res.status(404).json({ message: "Auction not found" });
+      }
+      res.json(auction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch auction", error });
+    }
+  };

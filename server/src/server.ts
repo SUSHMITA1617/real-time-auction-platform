@@ -7,17 +7,11 @@ import authRoutes from "./routes/auth.routes";
 import { authenticate } from "./middlewares/auth.middleware";
 import auctionRoutes from "./routes/auction.routes";
 import bidRoutes from "./routes/bid.routes";
+import { initSocket } from "./socket";
 
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
-});
 
 app.use(cors());
 app.use(express.json());
@@ -33,8 +27,23 @@ app.get("/api/protected", authenticate, (req, res) => {
   res.json({ message: "You accessed protected route" });
 });
 
+
+
+const server = http.createServer(app);
+
+const io = initSocket(server);
+
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+
+  socket.on("joinAuction", (auctionId: string) => {
+    socket.join(auctionId);
+    console.log(`Socket ${socket.id} joined auction ${auctionId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
 });
 
 const PORT = process.env.PORT || 5000;

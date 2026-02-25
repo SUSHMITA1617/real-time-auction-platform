@@ -1,10 +1,12 @@
 import { Response } from "express";
 import prisma from "../utils/prisma";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { getIO } from "../socket";
 
 export const placeBid = async (req: AuthRequest, res: Response) => {
   try {
     const { auctionId, amount } = req.body;
+    const user = req.user;
     const userId = req.user.userId;
 
     if (!auctionId || !amount) {
@@ -55,7 +57,7 @@ export const placeBid = async (req: AuthRequest, res: Response) => {
         },
       });
 
-      // Audit log
+     
       await tx.auditLog.create({
         data: {
           action: "BID_PLACED",
@@ -64,6 +66,14 @@ export const placeBid = async (req: AuthRequest, res: Response) => {
           auctionId,
         },
       });
+
+      const io = getIO();
+    io.to(auctionId).emit("bidUpdate", {
+  auctionId,
+  amount,
+  userId: user.id,
+  username: user.username,
+});
 
       return bid;
     });

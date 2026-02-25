@@ -52,10 +52,14 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+  {
+    id: user.id,
+    username: user.username,
+    role: user.role,
+  },
+  process.env.JWT_SECRET!,
+  { expiresIn: "1d" }
+);
 
     return res.status(200).json({ token });
   } catch (error) {
