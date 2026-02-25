@@ -2,17 +2,17 @@
 import React, { useEffect, useState } from 'react';
 
 const AuctionCard = ({ auction, type }) => (
-  <div className="border rounded-2xl p-5 bg-gray-100 shadow-xl mb-6 transition-transform hover:-translate-y-1 hover:shadow-2xl duration-200 flex flex-col w-full max-w-sm">
-    <img src="/image.png" alt={auction.title} className="w-full h-48 object-cover rounded-xl mb-4" />
-    <h3 className="text-xl font-bold mb-2 text-blue-700">{auction.title}</h3>
-    <p className="text-gray-600 mb-2">{auction.description}</p>
+  <div className="border border-blue-200 rounded-2xl p-6 bg-white bg-opacity-90 shadow-2xl mb-8 flex flex-col w-full max-w-sm transition-transform hover:-translate-y-1 hover:shadow-blue-300 duration-200">
+    <img src={auction.image || "/image.png"} alt={auction.title} className="w-full h-48 object-cover rounded-xl mb-4 shadow-lg" />
+    <h3 className="text-2xl font-extrabold mb-2 text-blue-800">{auction.title}</h3>
+    <p className="text-gray-700 mb-3 text-base">{auction.description}</p>
     {type === 'ongoing' && (
       <>
-        <div className="mt-2 text-green-700 font-semibold text-lg">Current Bid: ${auction.currentBid}</div>
-        <div className="mt-1 text-blue-600 font-medium">Time Remaining: {auction.timeRemaining}</div>
+        <div className="mb-1 text-green-700 font-bold text-lg">Current Bid: <span className="text-lime-600">${auction.currentBid}</span></div>
+        <div className="mb-1 text-blue-600 font-semibold">Time Remaining: <span className="text-blue-700">{auction.timeRemaining}</span></div>
         <a
           href={`/auction/${auction.id}`}
-          className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-center hover:bg-blue-700 transition"
+          className="mt-4 inline-block bg-gradient-to-r from-blue-600 to-blue-400 text-white px-5 py-2 rounded-lg font-bold text-center shadow-md hover:from-blue-700 hover:to-blue-500 transition"
         >
           View Auction
         </a>
@@ -20,14 +20,14 @@ const AuctionCard = ({ auction, type }) => (
     )}
     {type === 'upcoming' && (
       <>
-        <div className="mt-2 text-yellow-600 font-semibold">Starting Price: ${auction.startingPrice}</div>
-        <div className="mt-1 text-gray-500">Starts At: {auction.startsAt}</div>
+        <div className="mb-1 text-yellow-700 font-bold">Starting Price: <span className="text-yellow-800">${auction.startingPrice}</span></div>
+        <div className="mb-1 text-gray-500 font-medium">Starts At: <span className="text-gray-700">{auction.startsAt}</span></div>
       </>
     )}
     {type === 'completed' && (
       <>
-        <div className="mt-2 text-gray-700 font-semibold">Final Bid: ${auction.finalBid}</div>
-        <div className="mt-1 text-gray-400">Ended At: {auction.endedAt}</div>
+        <div className="mb-1 text-gray-700 font-bold">Final Bid: <span className="text-green-700">${auction.finalBid}</span></div>
+        <div className="mb-1 text-gray-400 font-medium">Ended At: <span className="text-gray-600">{auction.endedAt}</span></div>
       </>
     )}
   </div>
@@ -64,18 +64,18 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
-      <div className="max-w-6xl w-full mx-auto py-12 px-4 bg-white bg-opacity-90 rounded-2xl shadow-2xl">
-        <h1 className="text-4xl font-extrabold mb-10 text-center text-blue-800 tracking-tight">Auction Dashboard</h1>
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">Ongoing Auctions</h2>
+      <div className="max-w-6xl w-full mx-auto py-14 px-6 bg-white bg-opacity-90 rounded-2xl shadow-2xl border border-blue-200">
+        <h1 className="text-4xl font-extrabold mb-12 text-center text-blue-800 tracking-tight drop-shadow">Auction Dashboard</h1>
+        <section className="mb-14">
+          <h2 className="text-2xl font-bold mb-7 text-blue-700 text-center">Ongoing Auctions</h2>
           {loading ? (
             <div className="text-gray-500 text-center">Loading...</div>
           ) : ongoing.length ? (
-            <div className="flex flex-wrap justify-center gap-8">
+            <div className="flex flex-wrap justify-center gap-10">
               {ongoing.map(a => (
                 <AuctionCard key={a.id} auction={{
                   ...a,
-                  image: a.imageUrl ? a.imageUrl : '/assets/image.png',
+                  image: a.imageUrl ? a.imageUrl : '/image.png',
                   currentBid: a.currentHighestBid,
                   timeRemaining: a.endTime ? new Date(a.endTime).toLocaleString() : '',
                   startingPrice: a.startingPrice,
@@ -86,18 +86,18 @@ const Dashboard = () => {
             <div className="text-gray-500 text-center">No auctions</div>
           )}
         </section>
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 text-yellow-700 text-center">Upcoming Auctions</h2>
+        <section className="mb-14">
+          <h2 className="text-2xl font-bold mb-7 text-yellow-700 text-center">Upcoming Auctions</h2>
           {loading ? (
             <div className="text-gray-500 text-center">Loading...</div>
           ) : upcoming.length ? (
-            <div className="flex flex-wrap justify-center gap-8">
+            <div className="flex flex-wrap justify-center gap-10">
               {upcoming.map(a => (
                 <AuctionCard key={a.id} auction={{
                   ...a,
-                  image: a.imageUrl ? a.imageUrl : '/assets/image.png',
+                  image: a.imageUrl ? a.imageUrl : '/image.png',
                   startingPrice: a.startingPrice,
-                  timeRemaining: a.startTime ? new Date(a.startTime).toLocaleString() : '',
+                  startsAt: a.startTime ? new Date(a.startTime).toLocaleString() : '',
                 }} type="upcoming" />
               ))}
             </div>
@@ -106,15 +106,15 @@ const Dashboard = () => {
           )}
         </section>
         <section>
-          <h2 className="text-2xl font-bold mb-6 text-gray-700 text-center">Completed Auctions</h2>
+          <h2 className="text-2xl font-bold mb-7 text-gray-700 text-center">Completed Auctions</h2>
           {loading ? (
             <div className="text-gray-500 text-center">Loading...</div>
           ) : completed.length ? (
-            <div className="flex flex-wrap justify-center gap-8">
+            <div className="flex flex-wrap justify-center gap-10">
               {completed.map(a => (
                 <AuctionCard key={a.id} auction={{
                   ...a,
-                  image: a.imageUrl ? a.imageUrl : '/assets/image.png',
+                  image: a.imageUrl ? a.imageUrl : '/image.png',
                   finalBid: a.currentHighestBid,
                   endedAt: a.endTime ? new Date(a.endTime).toLocaleString() : '',
                 }} type="completed" />

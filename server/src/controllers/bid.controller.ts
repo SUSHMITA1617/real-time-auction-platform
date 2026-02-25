@@ -7,10 +7,19 @@ export const placeBid = async (req: AuthRequest, res: Response) => {
   try {
     const { auctionId, amount } = req.body;
     const user = req.user;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
-    if (!auctionId || !amount) {
-      return res.status(400).json({ message: "Missing fields" });
+    // Extra validation and logging
+    if (!auctionId || typeof auctionId !== "string" || auctionId.length < 10) {
+      console.error("Invalid auctionId", auctionId);
+      return res.status(400).json({ message: "Invalid auctionId" });
+    }
+    if (!userId || typeof userId !== "string" || userId.length < 10) {
+      console.error("Invalid userId", userId);
+      return res.status(400).json({ message: "Invalid userId" });
+    }
+    if (!amount) {
+      return res.status(400).json({ message: "Missing amount" });
     }
 
     const now = new Date();
@@ -69,11 +78,11 @@ export const placeBid = async (req: AuthRequest, res: Response) => {
 
       const io = getIO();
     io.to(auctionId).emit("bidUpdate", {
-  auctionId,
-  amount,
-  userId: user.id,
-  username: user.username,
-});
+      auctionId,
+      amount,
+      userId: user.id,
+      username: user.name,
+    });
 
       return bid;
     });

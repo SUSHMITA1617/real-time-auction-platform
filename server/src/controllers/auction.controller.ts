@@ -96,11 +96,11 @@ export const getCompletedAuctions = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
       const auction = await prisma.auction.findUnique({
-        where: { id: Number(id) },
-        include: {
-          highestBidder: true,
-          bids: true,
-        },
+         where: { id: req.params.id }
+        // include: {
+        //   highestBidder: true,
+        //   bids: true,
+        // },
       });
       if (!auction) {
         return res.status(404).json({ message: "Auction not found" });
@@ -109,4 +109,40 @@ export const getCompletedAuctions = async (req: Request, res: Response) => {
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch auction", error });
     }
-  };
+}
+
+  export const updateAuction = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const auction = await prisma.auction.update({
+      where: { id },
+      data: {
+        title: req.body.title,
+        description: req.body.description,
+        startingPrice: Number(req.body.startingPrice),
+        currentHighestBid: Number(req.body.currentHighestBid),
+        startTime: new Date(req.body.startTime),
+        endTime: new Date(req.body.endTime),
+      },
+    });
+
+    res.json(auction);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update auction" });
+  }
+};
+
+  export const deleteAuction = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.auction.delete({
+      where: { id },
+    });
+
+    res.json({ message: "Auction deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete auction" });
+  }
+};
