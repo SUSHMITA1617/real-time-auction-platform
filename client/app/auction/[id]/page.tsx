@@ -84,7 +84,9 @@ export default function AuctionPage() {
         startingPrice: res.data.startingPrice,
         endsAt: res.data.endTime,
       });
-      setHighestBidder(res.data.highestBidder?.username || null);
+      setHighestBidder(
+        res.data.highestBidder?.name || res.data.highestBidder?.username || null
+      );
     } catch (err) {
       setAuction(null);
       setHighestBidder(null);
@@ -112,6 +114,8 @@ export default function AuctionPage() {
 
   if (auction === null) return <div className="text-center text-red-600 mt-10">Auction not found or failed to load.</div>;
   if (!auction) return <div>Loading...</div>;
+  const hasBidAmount = Number(auction.currentHighestBid) > Number(auction.startingPrice);
+  const highestBidderLabel = highestBidder || (hasBidAmount ? "Bid placed" : "No bids yet");
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
       <div className="max-w-4xl w-full bg-white bg-opacity-90 rounded-2xl shadow-2xl p-10">
@@ -133,7 +137,7 @@ export default function AuctionPage() {
                 <span className="font-semibold text-blue-600">Time Remaining:</span> <span className="text-blue-700">{timeLeft || "--:--:--"}</span>
               </div>
               <div className="mb-3">
-                <span className="font-semibold text-gray-900">Highest Bidder:</span> <strong className="text-gray-900">{highestBidder || "No bids yet"}</strong>
+                <span className="font-semibold text-gray-900">Highest Bidder:</span> <strong className="text-gray-900">{highestBidderLabel}</strong>
               </div>
             </div>
             <div className="mt-6 flex items-center">
