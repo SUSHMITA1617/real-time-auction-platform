@@ -15,12 +15,17 @@ export default function LoginPage() {
   const [regPassword, setRegPassword] = useState("");
   const router = useRouter();
 
+  const persistAuthToken = (token: string) => {
+    localStorage.setItem("token", token);
+    document.cookie = `token=${encodeURIComponent(token)}; Path=/; Max-Age=604800; SameSite=Lax`;
+  };
+
   const handleLogin = async () => {
     setLoading(true);
     setError("");
     try {
       const res = await API.post("/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
+      persistAuthToken(res.data.token);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");
@@ -44,10 +49,14 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      // Try login after registration
-      const loginRes = await API.post("/auth/login", { email: regEmail, password: regPassword });
-      localStorage.setItem("token", loginRes.data.token);
-      router.push("/dashboard");
+      setShowRegister(false);
+      setEmail(regEmail);
+      setPassword("");
+      setRegName("");
+      setRegEmail("");
+      setRegPassword("");
+      alert("Account created successfully. Please log in.");
+      router.push("/login");
     } catch (err) {
       setError("Registration failed");
     } finally {

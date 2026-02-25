@@ -21,16 +21,23 @@ export default function AdminPage() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) router.push("/login");
-
+    const localToken = localStorage.getItem("token");
+    const cookieToken = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="));
+    if (!localToken && !cookieToken) {
+      router.push("/login");
+      return;
+    }
+   
     fetchAuctions();
   }, []);
 
   const fetchAuctions = async () => {
-    const res = await api.get("/auctions");
-    setAuctions(res.data);
-  };
+  const res = await api.get("/auctions");
+  setAuctions(res.data);
+};
+
 
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,42 +45,61 @@ export default function AdminPage() {
 
   const createAuction = async () => {
     setLoading(true);
-    if (!form.title || !form.description || !form.startingPrice || !form.startTime || !form.endTime) {
-  alert("Fill all fields (title, description, price, start time, end time)");
-  return;
-}
 
-    await api.post("/auctions", {
-      ...form,
-      startingPrice: Number(form.startingPrice),
-      currentHighestBid: Number(form.startingPrice),
-    });
+    try {
+      if (
+        !form.title ||
+        !form.description ||
+        !form.startingPrice ||
+        !form.startTime ||
+        !form.endTime
+      ) {
+        alert("Fill all fields (title, description, price, start time, end time)");
+        return;
+      }
 
-    setForm({
-      title: "",
-      description: "",
-      startingPrice: "",
-      imageUrl: "",
-      startTime: "",
-      endTime: "",
-    });
+      await api.post("/auctions", {
+        title: form.title,
+        description: form.description,
+        imageUrl: form.imageUrl,
+        startingPrice: Number(form.startingPrice),
+        currentHighestBid: Number(form.startingPrice),
+        startTime: form.startTime,
+        endTime: form.endTime,
+      });
 
-    fetchAuctions();
-    setLoading(false);
+      setForm({
+        title: "",
+        description: "",
+        startingPrice: "",
+        imageUrl: "",
+        startTime: "",
+        endTime: "",
+      });
+      await fetchAuctions();
+
+     
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateAuction = async () => {
     setLoading(true);
 
-    await api.put(`/auctions/${editingAuction.id}`, {
-      ...form,
-      startingPrice: Number(form.startingPrice),
-      currentHighestBid: Number(form.startingPrice),
-    });
+    try {
+      await api.put(`/auctions/${editingAuction.id}`, {
+        ...form,
+        startingPrice: Number(form.startingPrice),
+        currentHighestBid: Number(form.startingPrice),
+      });
 
-    setEditingAuction(null);
-    fetchAuctions();
-    setLoading(false);
+      setEditingAuction(null);
+      await fetchAuctions();
+     
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteAuction = async (id: string) => {
@@ -81,13 +107,13 @@ export default function AdminPage() {
     if (!confirmDelete) return;
 
     await api.delete(`/auctions/${id}`);
-    fetchAuctions();
+    await fetchAuctions();
+   
   };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-10 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-
 
       {/* Form */}
       <div className="bg-zinc-900 p-6 rounded-xl mb-10">
@@ -171,7 +197,7 @@ export default function AdminPage() {
                   title: auction.title,
                   description: auction.description,
                   imageUrl: auction.imageUrl || "",
-                  startingPrice: auction.startingPrice,
+                  startingPrice: String(auction.startingPrice ?? ""),
                   startTime: auction.startTime.slice(0, 16),
                   endTime: auction.endTime.slice(0, 16),
                 });

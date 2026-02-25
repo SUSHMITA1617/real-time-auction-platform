@@ -4,6 +4,7 @@ import {
   getOngoingAuctions,
   getUpcomingAuctions,
   getCompletedAuctions,
+  getAllAuctions,
   getAuctionById,
   updateAuction,
   deleteAuction,
@@ -18,6 +19,7 @@ const router = Router();
 router.post("/", authenticate, createAuction);
 
 //for Public fetch
+router.get("/", getAllAuctions); 
 router.get("/ongoing", getOngoingAuctions);
 router.get("/upcoming", getUpcomingAuctions);
 router.get("/completed", getCompletedAuctions);

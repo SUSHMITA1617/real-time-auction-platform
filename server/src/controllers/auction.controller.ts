@@ -146,3 +146,15 @@ export const getCompletedAuctions = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to delete auction" });
   }
 };
+
+export const getAllAuctions = async (req: Request, res: Response) => {
+  try {
+    const auctions = await prisma.auction.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(auctions);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch auctions" });
+  }
+};
